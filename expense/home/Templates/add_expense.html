@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{%load static %}
+{% block content %}
+<div class="add-page" style="background: url('{% static 'pic4.jpg' %}');
+      background-size: cover;
+      background-position: center; height: 100vh; display: flex; justify-content: center; align-items: center;">
+  
+
+  <!-- Form Section -->
+  <div class="container" style="max-width: 500px;">
+    <div class="card shadow-lg">
+      <div class="card-body p-4">
+        <h3 class="text-center mb-4">New Transaction Form</h3>
+        <form id="form" method="POST">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="name" class="form-label">Transaction Name</label>
+            <input type="text" class="form-control" required name="name" id="name" placeholder="Enter transaction name..." />
+          </div>
+          <div class="mb-3">
+            <label for="amount" class="form-label">Amount</label>
+            <input type="number" class="form-control" required name="amount" id="amount" placeholder="Enter amount..." />
+          </div>
+          <div class="mb-3">
+            <label for="expense_type" class="form-label">Type</label>
+            <select name="expense_type" required class="form-select">
+              <option value="Negative">Expense</option>
+              <option value="Positive">Income</option>
+            </select>
+          </div>
+          <button class="btn btn-primary w-100 btn-lg custom-btn" type="submit">Add Transaction</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Inline CSS for Styling -->
+<style>
+  body {
+    background-color: rgba(0, 0, 0, 0.5); /* Dark overlay to improve readability */
+  }
+  .add-page {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .card {
+    background-color: rgba(255, 255, 255, 0.9); /* Slight transparency for the form card */
+    border-radius: 10px;
+  }
+  .form-control, .form-select {
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: none;
+  }
+  .form-control:focus, .form-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  }
+  .btn-primary {
+    background-color: #007bff;
+    border: none;
+    transition: background-color 0.3s ease;
+  }
+  .btn-primary:hover {
+    background-color: #0056b3;
+  }
+  h1, h3 {
+    font-weight: bold;
+    color: black;
+  }
+</style>
+
+<!-- Optional JavaScript for Form Effects -->
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // Apply focus effect on inputs
+    const inputs = document.querySelectorAll('.form-control, .form-select');
+    
+    inputs.forEach(input => {
+      input.addEventListener('focus', function() {
+        this.style.boxShadow = '0 0 5px rgba(0, 123, 255, 0.5)';
+      });
+      
+      input.addEventListener('blur', function() {
+        this.style.boxShadow = 'none';
+      });
+    });
+  });
+</script>
+
+{% endblock %}

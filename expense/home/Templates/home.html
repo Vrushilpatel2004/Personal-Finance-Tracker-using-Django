@@ -1,0 +1,449 @@
+{% extends "base.html" %}
+{% comment %} 
+{% block content %}
+<!-- Hero Section with Background Image -->
+<div style="background: url('your-background-image.jpg') no-repeat center center; background-size: cover; height: 300px; color: white; text-align: center; padding: 100px 0;">
+  <h1>Expense Tracker</h1>
+  <p>Track your income and expenses seamlessly</p>
+</div>
+
+<!-- Main Content Section -->
+<div style="max-width: 800px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; background: #f9f9f9;">
+  <!-- Balance Section -->
+  <div style="text-align: center; margin-bottom: 20px;">
+    <h3>Your Balance</h3>
+    <h1>${{ profile.balance }}</h1>
+  </div>
+
+  <!-- Income and Expense Section -->
+  <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+    <div style="flex: 1; margin-right: 10px; padding: 20px; background: #c8e6c9; border-radius: 5px;">
+      <h4>Income</h4>
+      <p>+${{ profile.income }}</p>
+    </div>
+    <div style="flex: 1; margin-left: 10px; padding: 20px; background: #ffcdd2; border-radius: 5px;">
+      <h4>Expenses</h4>
+      <p>-${{ total_expenses }}</p>
+    </div>
+  </div>
+
+  <!-- Transaction History Section with Edit/Delete Actions -->
+  <div>
+    <h3>Transaction History</h3>
+    <ul style="list-style: none; padding: 0;">
+      {% for expense in expenses %}
+        <li style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #ddd;">
+          {{ expense.name }} 
+          <span style="color: {% if expense.expense_type == 'Positive' %}green{% else %}red{% endif %};">
+            {% if expense.expense_type == 'Positive' %}+{% else %}-{% endif %}${{ expense.amount }}
+          </span>
+          
+          <!-- Edit and Delete Buttons -->
+          <div style="margin-left: 10px;">
+            <a href="{% url 'edit_expense' expense.id %}" style="color: orange; margin-right: 10px;">Edit</a>
+            <form action="{% url 'delete_expense' expense.id %}" method="POST" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" style="color: red; background: none; border: none;">Delete</button>
+            </form>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <!-- Add or Update Transaction Form -->
+  <div style="margin-top: 20px;">
+    <h3>{% if update %}Update Transaction{% else %}Add New Transaction{% endif %}</h3>
+    <form id="form" method="POST">
+      {% csrf_token %}
+      <div style="margin-bottom: 10px;">
+        <label for="text">Transaction Name</label>
+        <input type="text" style="width: 100%; padding: 8px;" name="text" id="text" required placeholder="Enter transaction name..." 
+               {% if update %} value="{{ expense.name }}" {% endif %}>
+      </div>
+      <div style="margin-bottom: 10px;">
+        <label for="amount">Amount</label>
+        <input type="number" style="width: 100%; padding: 8px;" name="amount" id="amount" required placeholder="Enter amount..." 
+               {% if update %} value="{{ expense.amount }}" {% endif %}>
+      </div>
+      <div style="margin-bottom: 20px;">
+        <label for="expense_type">Type</label>
+        <select name="expense_type" style="width: 100%; padding: 8px;">
+          <option value="Positive" {% if update and expense.expense_type == 'Positive' %}selected{% endif %}>Income</option>
+          <option value="Negative" {% if update and expense.expense_type == 'Negative' %}selected{% endif %}>Expense</option>
+        </select>
+      </div>
+      <button type="submit" style="width: 100%; padding: 10px; background: blue; color: white; border: none; border-radius: 5px;">
+        {% if update %}Update{% else %}Add{% endif %} Transaction
+      </button>
+    </form>
+  </div>
+</div> {% endcomment %}
+
+
+
+
+{% comment %} {% block content %}
+<div class="container-fluid custom-hero">
+  <div class="row text-center py-5">
+    <div class="col-12">
+      <h1 class="display-4 text-white">Expense Tracker</h1>
+      <p class="lead text-white-50">Track your income and expenses seamlessly</p>
+    </div>
+  </div>
+</div>
+
+<div class="container custom-main-content my-5">
+  <!-- Balance Section -->
+  <div class="row">
+    <div class="col-md-4 offset-md-4 text-center mb-4">
+      <h3>Your Balance</h3>
+      <h1 id="balance" class="display-4">${{profile.balance}}</h1>
+    </div>
+  </div>
+
+  <!-- Income and Expense Section -->
+  <div class="row text-center mb-5">
+    <div class="col-md-6">
+      <div class="card shadow-sm border-success">
+        <div class="card-body">
+          <h4 class="card-title">Income</h4>
+          <p id="money-plus" class="money plus h4">+${{profile.income}}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card shadow-sm border-danger">
+        <div class="card-body">
+          <h4 class="card-title">Expense</h4>
+          <p id="money-minus" class="money minus h4">-${{profile.expenses}}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transaction History Section -->
+  <div class="row">
+    <div class="col-md-8 offset-md-2">
+      <h3 class="text-center">Transaction History</h3>
+      <ul id="list" class="list-group mt-4">
+        {% for expense in expenses %}
+          {% if expense.expense_type == 'Positive' %}
+          <li class="list-group-item d-flex justify-content-between align-items-center plus">
+            {{ expense.name }} <span class="badge bg-success">+${{ expense.amount }}</span>
+          </li>
+          {% else %}
+          <li class="list-group-item d-flex justify-content-between align-items-center minus">
+            {{ expense.name }} <span class="badge bg-danger">-${{ expense.amount }}</span>
+          </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <!-- Add New Transaction Section -->
+  <div class="row mt-5">
+    <div class="col-md-6 offset-md-3">
+      <h3 class="text-center">Add New Transaction</h3>
+      <form id="form" method="POST" class="mt-4">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="text" class="form-label">Transaction Name</label>
+          <input type="text" class="form-control" required name="text" id="text" placeholder="Enter transaction name..." />
+        </div>
+        <div class="mb-3">
+          <label for="amount" class="form-label">Amount</label>
+          <input type="number" class="form-control" required name="amount" id="amount" placeholder="Enter amount..." />
+        </div>
+        <div class="mb-3">
+          <label for="expense_type" class="form-label">Type</label>
+          <select name="expense_type" required class="form-select">
+            <option value="Positive">Income</option>
+            <option value="Negative">Expense</option>
+          </select>
+        </div>
+        <button class="btn btn-primary w-100 btn-lg custom-btn" type="submit">Add Transaction</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %} {% endcomment %}
+
+{% comment %} --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- {% endcomment %}
+{% block content %} 
+{% load static %}
+
+{% comment %} --------------------------------------------------------------------------------- {% endcomment %}
+<div style="position: relative; height: 300px; color: white; text-align: center;">
+  <div style="background: url('{% static 'pic1.jpg' %}') no-repeat center center; background-size: cover; height: 100%;">
+    <div style="background-color: rgba(0, 0, 0, 0); height: 100%; padding: 100px 0;">
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+          <h1 style="color: #FF5733; font-size: 2.5rem; font-weight: bold;">Welcome, {{ user_name }}!</h1>
+        </div>
+      </div>
+
+      <h1 style="color: #FFCC00; font-size: 2.5rem; font-weight: bold;">Expense Tracker</h1>
+      <p style="color: #FFDA44; font-size: 1.2rem;">Track your income and expenses seamlessly</p>
+    </div>
+  </div>
+</div>
+<br>
+
+<div style="text-align: right; margin: 20px 0;">
+  <a href="{% url 'logout' %}" 
+     style="
+       padding: 12px 24px; 
+       font-size: 18px; 
+       background: linear-gradient(90deg, #007bff, #0056b3); 
+       color: white; 
+       text-decoration: none; 
+       border-radius: 8px;">
+    Log Out
+  </a> 
+</div>
+-----------------------------------------------------------------------------
+
+
+  <div class="container custom-main-content my-5">
+    <div class="row">
+      <div class="col-md-4 offset-md-4 text-center mb-4">
+        <h3>Your Balance</h3>
+        <h1 id="balance" class="display-4">${{profile.balance}}</h1>
+      </div>
+    </div> 
+  
+    <div class="row text-center mb-5">
+      <div class="col-md-6">
+        <div class="card shadow-sm border-success">
+          <div class="card-body">
+            <h4 class="card-title">Income</h4>
+            <p id="money-plus" class="money plus h4">+${{profile.income}}</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card shadow-sm border-danger">
+          <div class="card-body">
+            <h4 class="card-title">Expense</h4>
+            <p id="money-minus" class="money minus h4">-${{profile.expenses}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+  
+  <!-- Transaction History -->
+  <div class="row">
+    <div class="col-md-8 offset-md-2">
+      <h3 class="text-center">Transaction History</h3>
+      <ul id="list" class="list-group mt-4">
+        {% for expense in expenses %}
+          <li class="list-group-item d-flex justify-content-between align-items-center {% if expense.expense_type == 'Positive' %}plus{% else %}minus{% endif %}">
+            <div>
+              <strong>{{ expense.name }}</strong><br>
+              <small class="text-muted">Date: {{ expense.created_at|date:"d M H" }}</small>
+            </div>
+            <span class="badge {% if expense.expense_type == 'Positive' %}bg-success{% else %}bg-danger{% endif %}">${{ expense.amount }}</span>
+            <button class="btn btn-sm btn-warning"  data-id="{{ expense.id }}" data-name="{{ expense.name }}" data-amount="{{ expense.amount }}" data-type="{{ expense.expense_type }}">Edit</button>
+            <button class="btn btn-sm btn-danger"  data-id="{{ expense.id }}" data-name="{{ expense.name }}">Delete</button>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div> 
+  
+  <!-- Add Modal -->
+  <div class="modal fade" id="addExpenseModal" tabindex="-1" aria-labelledby="addExpenseModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form method="POST">
+          {% csrf_token %}
+          <div class="modal-header">
+            <h5 class="modal-title" id="addExpenseModalLabel">Add New Transaction</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="addExpenseName" class="form-label">Name</label>
+              <input type="text" class="form-control" id="addExpenseName" name="name" required>
+            </div>
+            <div class="mb-3">
+              <label for="addExpenseAmount" class="form-label">Amount</label>
+              <input type="number" class="form-control" id="addExpenseAmount" name="amount" required>
+            </div>
+            <div class="mb-3">
+              <label for="addExpenseType" class="form-label">Type</label>
+              <select class="form-select" id="addExpenseType" name="expense_type" required>
+                <option value="Positive">Income</option>
+                <option value="Negative">Expense</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-primary">Add Transaction</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Add Transaction Button -->
+  <div class="text-center my-4">
+    <button id="addTransactionButton" class="btn btn-primary">Add New Transaction</button>
+  </div>
+  <!-- Edit Modal -->
+<div class="modal fade" id="editExpenseModal" tabindex="-1" aria-labelledby="editExpenseModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" id="editExpenseId" name="expense_id">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editExpenseModalLabel">Edit Transaction</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="editExpenseName" class="form-label">Name</label>
+            <input type="text" class="form-control" id="editExpenseName" name="name" required>
+          </div>
+          <div class="mb-3">
+            <label for="editExpenseAmount" class="form-label">Amount</label>
+            <input type="number" class="form-control" id="editExpenseAmount" name="amount" required>
+          </div>
+          <div class="mb-3">
+            <label for="editExpenseType" class="form-label">Type</label>
+            <select class="form-select" id="editExpenseType" name="expense_type" required>
+              <option value="Positive">Income</option>
+              <option value="Negative">Expense</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Update Transaction</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+  <!-- Delete Modal -->
+  <div class="modal fade" id="deleteExpenseModal" tabindex="-1" aria-labelledby="deleteExpenseModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form method="POST">
+          {% csrf_token %}
+          <input type="hidden" id="deleteExpenseId" name="expense_id">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deleteExpenseModalLabel">Delete Transaction</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>Are you sure you want to delete <strong id="deleteExpenseName"></strong>?</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button class="btn btn-sm btn-danger" data-id="{{ expense.id }}" data-name="{{ expense.name }}">Delete</button>
+  
+            {% comment %} <input type="hidden" id="deleteExpenseId" name="expense_id" value=""> {% endcomment %}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>   
+  
+  
+  {% comment %} -------------------------------------------------------------------------------------------------- {% endcomment %}
+  <!-- Delete Modal -->
+  {% comment %} <div class="modal fade" id="deleteExpenseModal" tabindex="-1" aria-labelledby="deleteExpenseLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form method="POST">
+          {% csrf_token %}
+          <input type="hidden" id="deleteExpenseId" name="expense_id">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deleteExpenseLabel">Delete Transaction</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>Are you sure you want to delete <strong id="deleteExpenseName"></strong>?</p>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" name="delete" class="btn btn-danger">Delete</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div> {% endcomment %}
+---------------------------------------------------------------------
+    
+
+
+
+    -------------------------javascipt- delete is not supported------------------------------------------------------
+    <script>
+      
+        // Handle Add Transaction Modal
+        document.getElementById('addTransactionButton').addEventListener('click', function() {
+          // Clear any previous values in the Add Transaction form
+          document.getElementById('addExpenseName').value = '';
+          document.getElementById('addExpenseAmount').value = '';
+          document.getElementById('addExpenseType').value = 'Positive'; // Default to Positive (Income)
+        
+          // Show the Add Transaction modal
+          var addModal = new bootstrap.Modal(document.getElementById('addExpenseModal'));
+          addModal.show();
+        });  
+      
+          // Handle Edit Modal
+          var editButtons = document.querySelectorAll('.btn-warning');
+          editButtons.forEach(function(button) {
+            button.addEventListener('click', function() {
+              var id = this.getAttribute('data-id');
+              var name = this.getAttribute('data-name');
+              var amount = this.getAttribute('data-amount');
+              var type = this.getAttribute('data-type');
+          
+              // Update the modal with the data
+              document.getElementById('editExpenseId').value = id;
+              document.getElementById('editExpenseName').value = name;
+              document.getElementById('editExpenseAmount').value = amount;
+              document.getElementById('editExpenseType').value = type;
+          
+              // Show the modal
+              var editModal = new bootstrap.Modal(document.getElementById('editExpenseModal'));
+              editModal.show();
+            });
+          });
+          
+          // Handle Delete Modal
+          var deleteButtons = document.querySelectorAll('.btn-danger');
+          deleteButtons.forEach(function(button) {
+            button.addEventListener('click', function() {
+              var id = this.getAttribute('data-id');
+              var name = this.getAttribute('data-name');
+              var amount = this.getAttribute('data-amount');
+          
+              // Update the modal with the data
+              document.getElementById('deleteExpenseName').textContent = name + ' - $' + amount;
+              
+               // Set the form action to the URL for deletion
+              var deleteForm = document.getElementById('deleteExpenseForm');
+              deleteForm.action = "{% url 'delete_expense' '0' %}".replace('0', id);
+
+              // Show the modal
+              var deleteModal = new bootstrap.Modal(document.getElementById('deleteExpenseModal'));
+              deleteModal.show();
+            });
+          });
+                
+  
+</script>
+          
+  
+
+{% endblock %}
